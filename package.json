@@ -2,7 +2,7 @@
   "name": "velzon-react",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:8000",
+  "proxy": "http://localhost:3000",
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^32.0.0",
     "@ckeditor/ckeditor5-react": "^4.0.0",
@@ -44,7 +44,7 @@
     "lord-icon-element": "^3.3.3",
     "lottie-web": "^5.8.1",
     "moment-timezone": "^0.5.43",
-    "node-sass": "^7.0.1",
+    "node-sass": "^9.0.0",
     "nouislider-react": "^3.4.1",
     "prismjs": "^1.26.0",
     "quill": "^1.3.7",

@@ -108,24 +108,23 @@ const VerticalLayout = (props) => {
         <span data-key="t-menu">Menu</span>
       </li>
       <li className="nav-item">
-        <Link className="nav-link menu-link" to="/gold-price">
-          <span data-key="t-apps"> Gold Prices </span>
+        <Link className="nav-link menu-link" to="/message-type">
+          <span data-key="t-apps"> Message Type </span>
         </Link>
       </li>
       <li className="nav-item">
-        <Link className="nav-link menu-link" to="/gold-karat">
-          <span data-key="t-apps"> Gold Karat </span>
+        <Link className="nav-link menu-link" to="/message-send">
+          <span data-key="t-apps"> Message Send </span>
+        </Link>
+      </li>
+      <li className="nav-item">
+        <Link className="nav-link menu-link" to="/message-recv">
+          <span data-key="t-apps"> Message Recieve </span>
         </Link>
       </li>
 
       <li className="nav-item">
-        <Link className="nav-link menu-link" to="/inquiry-details">
-          <span data-key="t-apps"> Inquiry Details </span>
-        </Link>
-      </li>
-
-      <li className="nav-item">
-        <Link
+        {/* <Link
           className="nav-link menu-link"
           to="#"
           data-bs-toggle="collapse"
@@ -134,13 +133,12 @@ const VerticalLayout = (props) => {
           }}
         >
           <span data-key="t-apps"> Location Setup </span>
-        </Link>
-        <Collapse
+        </Link> */}
+        {/* <Collapse
           className="menu-dropdown"
-          isOpen={locationSetup}
-          //   id="sidebarApps"
-        >
-          <ul className="nav nav-sm flex-column test">
+          isOpen={locationSetup} */}
+        // id="sidebarApps" >
+        {/* <ul className="nav nav-sm flex-column test">
             <li className="nav-item">
               <Link to="/country" className="nav-link">
                 Country
@@ -159,13 +157,13 @@ const VerticalLayout = (props) => {
             <li className="nav-item">
               <Link to="/ziya-location" className="nav-link">
                 Ziya Location
-              </Link>
-            </li>
+              </Link> */}
+        {/* </li>
           </ul>
-        </Collapse>
+        </Collapse> */}
       </li>
 
-      <li className="nav-item">
+      {/* <li className="nav-item">
         <Link
           className="nav-link menu-link"
           to="#"
@@ -202,8 +200,8 @@ const VerticalLayout = (props) => {
               </Link>
             </li>
           </ul>
-        </Collapse>
-      </li>
+        </Collapse> */}
+      {/* </li> */}
     </React.Fragment>
   );
 };
