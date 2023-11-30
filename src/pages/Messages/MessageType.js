@@ -66,8 +66,8 @@ const MessageType = () => {
       setNewMessageType(""); // Clear the input field
       setIsCheckboxChecked(false); // Reset checkbox state
       setModal(false); // Close the modal after submitting
-    } catch (error) {
-      console.error("Error creating message type:", error);
+    } catch (err) {
+      console.error("Error creating message type:", err);
     }
   };
 
