@@ -5,9 +5,11 @@ import { Navigate } from "react-router-dom";
 // import DashboardAnalytics from "../pages/DashboardAnalytics";
 import DashboardCrm from "../pages/DashboardCrm";
 
-import MessageRecv from "../pages/Messages/MessageRecv";
-import MessageSend from "../pages/Messages/MessageSend";
-import MessageType from "../pages/Messages/MessageType";
+import MessageType from "../pages/whatsapp/MessageType";
+
+// import MessageRecv from "../pages/Messages/MessageRecv";
+// import MessageSend from "../pages/Messages/MessageSend";
+// import MessageType from "../pages/Messages/MessageType";
 // import CountryN from "../pages/adminZiya/LocationSetUp/Country/CountryN";
 // import City from "../pages/adminZiya/LocationSetUp/City/City";
 // import State from "../pages/adminZiya/LocationSetUp/State/State";
@@ -30,6 +32,8 @@ import Category from "../pages/adminZiya/Products/Category";
 import CategoryProduct from "../pages/adminZiya/Products/ProductCategory";
 import ManageMedia from "../pages/adminZiya/Media/ManageMedia";
 import MediaPlayList from "../pages/adminZiya/Media/MediaPlayList";
+import MessageSend from "../pages/whatsapp/MessageSend";
+import MessageReceive from "../pages/whatsapp/MessageReceive";
 
 // import FileManager from "../pages/FileManager";
 // import ToDoList from "../pages/ToDo";
@@ -53,16 +57,18 @@ const authProtectedRoutes = [
   { path: "/manage-media", component: <ManageMedia /> },
   { path: "/media-playlist", component: <MediaPlayList /> },
 
-  // { path: "/test", component: <Test /> },
-  { path: "/message-recv", component: <MessageRecv /> },
-  { path: "/message-send", component: <MessageSend /> },
   { path: "/message-type", component: <MessageType /> },
+  { path: "/message-send", component: <MessageSend /> },
+  { path: "/message-receive", component: <MessageReceive/> },
+
+  // { path: "/test", component: <Test /> },
+  // { path: "/message-recv", component: <MessageRecv /> },
+  // { path: "/message-send", component: <MessageSend /> },
+  // { path: "/message-type", component: <MessageType /> },
 
   // //User Profile
   { path: "/profile", component: <UserProfile /> },
 
-  // this route should be at the end of all other routes
-  // eslint-disable-next-line react/display-name
   {
     path: "/",
     exact: true,
