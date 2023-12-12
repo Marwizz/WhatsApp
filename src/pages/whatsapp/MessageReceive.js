@@ -21,6 +21,7 @@ import { listMessageType } from "../../functions/Whatsapp/MessageType";
 import {
   createMessageSend,
   getMessageSend,
+  listMessageSend,
   removeMessageSend,
   updateMessageSend,
 } from "../../functions/Whatsapp/MessageSend";
@@ -73,9 +74,17 @@ const MessageReceive = () => {
 
     {
       name: "Message",
-      selector: (row) => row.message,
+      selector: (row) => row.message ? row.message : "-",
       sortable: true,
       sortField: "message",
+      minWidth: "150px",
+    },
+
+    {
+      name: "Message Receive",
+      selector: (row) => row.MessageReceive,
+      sortable: true,
+      sortField: "MessageReceive",
       minWidth: "150px",
     },
 
@@ -186,14 +195,14 @@ const MessageReceive = () => {
     loadAllTypes();
     loadMsgOptions();
     loadMsgReceived();
-  });
+  }, []);
 
   const loadAllTypes = () => {
     listMessageType().then((res) => setMessageTypes(res));
   };
 
   const loadMsgReceived = () => {
-    listMessageReceive().then((res) => setMessageReceived(res));
+    listMessageSend().then((res) => setMessageReceived(res));
   };
 
   const loadMsgOptions = () => {
@@ -205,6 +214,14 @@ const MessageReceive = () => {
       console.log("no errors");
     }
   }, [formErrors, isSubmit]);
+
+  useEffect(() => {
+    if(type == "6577f921e7aabfb18ac8c07a"){ //type="interactive"
+      setValues({...values,  message: "" });
+    }else if( type == "6577f754e7aabfb18ac8c077" ){  // type=="text"
+        setValues({...values,  receiveId: "", sendId: "", optionId: "" });
+    }
+  }, [type])
 
   const handleChange = (e) => {
     setValues({ ...values, [e.target.name]: e.target.value });
@@ -232,6 +249,7 @@ const MessageReceive = () => {
 
   const tog_list = () => {
     setModalList(!modal_list);
+    setValues(initialState);
     setIsSubmit(false);
   };
 
@@ -273,6 +291,7 @@ const MessageReceive = () => {
     // setFormErrors(false);
     getMessageReceive(_id)
       .then((res) => {
+        console.log(res);
         setValues({
           ...values,
           message: res.message,
@@ -412,7 +431,7 @@ const MessageReceive = () => {
         <form>
           <ModalBody>
             <div className="form-floating mb-3 mt-3">
-              <select
+              <Input
                 type="select"
                 className="fomr-control"
                 name="type"
@@ -431,7 +450,7 @@ const MessageReceive = () => {
                     </React.Fragment>
                   );
                 })}
-              </select>
+              </Input>
               <Label>
                 Message Type <span className="text-danger">*</span>
               </Label>
@@ -444,23 +463,25 @@ const MessageReceive = () => {
                 className="form-control"
                 placeholder="Enter title"
                 required
+                disabled={type != "6577f754e7aabfb18ac8c077"}
                 name="message"
                 value={message}
                 onChange={handleChange}
               />
               <label htmlFor="role-field" className="form-label">
                 Message
-                <span className="text-danger">*</span>
+               
               </label>
             </div>
 
             {/* type == interactive */}
             <div className="form-floating mb-3 mt-3">
-              <select
+              <Input
                 type="select"
                 className="fomr-control"
                 name="receiveId"
                 value={receiveId}
+                disabled={type != "6577f921e7aabfb18ac8c07a"}
                 data-choices
                 data-choices-sorting="true"
                 onChange={handleChange}
@@ -475,18 +496,19 @@ const MessageReceive = () => {
                     </React.Fragment>
                   );
                 })}
-              </select>
+              </Input>
               <Label>
-                 Receive <span className="text-danger">*</span>
+                 Receive 
               </Label>
             </div>
 
             <div className="form-floating mb-3 mt-3">
-              <select
+              <Input
                 type="select"
                 className="fomr-control"
                 name="optionId"
                 value={optionId}
+                disabled={type != "6577f921e7aabfb18ac8c07a"}
                 data-choices
                 data-choices-sorting="true"
                 onChange={handleChange}
@@ -495,20 +517,20 @@ const MessageReceive = () => {
                 {messageOptions.map((c) => {
                   return (
                     <React.Fragment key={c._id}>
-                      {c.IsActive && (
+                      
                         <option value={c._id}>{c.optionTitle}</option>
-                      )}
+                     
                     </React.Fragment>
                   );
                 })}
-              </select>
+              </Input>
               <Label>
-                 Option <span className="text-danger">*</span>
+                 Option 
               </Label>
             </div>
 
             <div className="form-floating mb-3 mt-3">
-              <select
+              <Input
                 type="select"
                 className="fomr-control"
                 name="sendId"
@@ -527,9 +549,9 @@ const MessageReceive = () => {
                     </React.Fragment>
                   );
                 })}
-              </select>
+              </Input>
               <Label>
-                 Send <span className="text-danger">*</span>
+                 Send
               </Label>
             </div>
 
@@ -587,7 +609,7 @@ const MessageReceive = () => {
         <form>
         <ModalBody>
             <div className="form-floating mb-3 mt-3">
-              <select
+              <Input
                 type="select"
                 className="fomr-control"
                 name="type"
@@ -606,7 +628,7 @@ const MessageReceive = () => {
                     </React.Fragment>
                   );
                 })}
-              </select>
+              </Input>
               <Label>
                 Message Type <span className="text-danger">*</span>
               </Label>
@@ -621,6 +643,7 @@ const MessageReceive = () => {
                 required
                 name="message"
                 value={message}
+                disabled={type != "6577f754e7aabfb18ac8c077"}
                 onChange={handleChange}
               />
               <label htmlFor="role-field" className="form-label">
@@ -631,11 +654,12 @@ const MessageReceive = () => {
 
             {/* type == interactive */}
             <div className="form-floating mb-3 mt-3">
-              <select
+              <Input
                 type="select"
                 className="fomr-control"
                 name="receiveId"
                 value={receiveId}
+                disabled={type != "6577f921e7aabfb18ac8c07a"}
                 data-choices
                 data-choices-sorting="true"
                 onChange={handleChange}
@@ -650,18 +674,19 @@ const MessageReceive = () => {
                     </React.Fragment>
                   );
                 })}
-              </select>
+              </Input>
               <Label>
                  Receive <span className="text-danger">*</span>
               </Label>
             </div>
 
             <div className="form-floating mb-3 mt-3">
-              <select
+              <Input
                 type="select"
                 className="fomr-control"
                 name="optionId"
                 value={optionId}
+                disabled={type != "6577f921e7aabfb18ac8c07a"}
                 data-choices
                 data-choices-sorting="true"
                 onChange={handleChange}
@@ -670,20 +695,20 @@ const MessageReceive = () => {
                 {messageOptions.map((c) => {
                   return (
                     <React.Fragment key={c._id}>
-                      {c.IsActive && (
+                      {/* {c.IsActive && ( */}
                         <option value={c._id}>{c.optionTitle}</option>
-                      )}
+                      {/* )} */}
                     </React.Fragment>
                   );
                 })}
-              </select>
+              </Input>
               <Label>
                  Option <span className="text-danger">*</span>
               </Label>
             </div>
 
             <div className="form-floating mb-3 mt-3">
-              <select
+              <Input
                 type="select"
                 className="fomr-control"
                 name="sendId"
@@ -702,7 +727,7 @@ const MessageReceive = () => {
                     </React.Fragment>
                   );
                 })}
-              </select>
+              </Input>
               <Label>
                  Send <span className="text-danger">*</span>
               </Label>

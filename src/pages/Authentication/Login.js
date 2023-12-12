@@ -243,11 +243,11 @@ const Login = (props) => {
                             {
                               if (
                                 validation.values.email ==
-                                  "ziyajewelers@gmail.com" &&
+                                  "admin.whatsapp@marwiz.in" &&
                                 validation.values.password == "12345678"
                               ) {
-                                localStorage.setItem("ZiyaUser", true);
-                                window.location.replace("/gold-price");
+                                localStorage.setItem("admin.whatsapp", true);
+                                window.location.replace("/message-type");
                               } else {
                                 toast.error("Authentication failed!");
                               }
