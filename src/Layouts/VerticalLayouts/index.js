@@ -108,100 +108,21 @@ const VerticalLayout = (props) => {
         <span data-key="t-menu">Menu</span>
       </li>
       <li className="nav-item">
-        <Link className="nav-link menu-link" to="/message-type">
-          <span data-key="t-apps"> Message Type </span>
+        <Link className="nav-link menu-link" to="/messages-type">
+          <span data-key="t-apps"> Messages Type </span>
         </Link>
       </li>
       <li className="nav-item">
-        <Link className="nav-link menu-link" to="/message-send">
-          <span data-key="t-apps"> Message Send </span>
+        <Link className="nav-link menu-link" to="/messages-send">
+          <span data-key="t-apps"> Messages Send </span>
         </Link>
       </li>
       <li className="nav-item">
-        <Link className="nav-link menu-link" to="/message-recv">
-          <span data-key="t-apps"> Message Recieve </span>
+        <Link className="nav-link menu-link" to="/messages-receive">
+          <span data-key="t-apps"> Messages Receive </span>
         </Link>
       </li>
 
-      <li className="nav-item">
-        {/* <Link
-          className="nav-link menu-link"
-          to="#"
-          data-bs-toggle="collapse"
-          onClick={() => {
-            setLocationSetup(!locationSetup);
-          }}
-        >
-          <span data-key="t-apps"> Location Setup </span>
-        </Link> */}
-        {/* <Collapse
-          className="menu-dropdown"
-          isOpen={locationSetup} */}
-        // id="sidebarApps" >
-        {/* <ul className="nav nav-sm flex-column test">
-            <li className="nav-item">
-              <Link to="/country" className="nav-link">
-                Country
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/state" className="nav-link">
-                State
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/city" className="nav-link">
-                City
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/ziya-location" className="nav-link">
-                Ziya Location
-              </Link> */}
-        {/* </li>
-          </ul>
-        </Collapse> */}
-      </li>
-
-      {/* <li className="nav-item">
-        <Link
-          className="nav-link menu-link"
-          to="#"
-          data-bs-toggle="collapse"
-          onClick={() => {
-            setproduct(!product);
-          }}
-        >
-          <span data-key="t-apps"> Product Details </span>
-        </Link>
-        <Collapse
-          className="menu-dropdown"
-          isOpen={product}
-          //   id="sidebarApps"
-        >
-          <ul className="nav nav-sm flex-column test">
-            <li className="nav-item">
-              <Link to="/category" className="nav-link">
-                Category
-              </Link>
-            </li>
-          </ul>
-          <ul className="nav nav-sm flex-column test">
-            <li className="nav-item">
-              <Link to="/category-products" className="nav-link">
-                Products
-              </Link>
-            </li>
-          </ul>
-          <ul className="nav nav-sm flex-column test">
-            <li className="nav-item">
-              <Link to="/top-products" className="nav-link">
-                Top Products
-              </Link>
-            </li>
-          </ul>
-        </Collapse> */}
-      {/* </li> */}
     </React.Fragment>
   );
 };
