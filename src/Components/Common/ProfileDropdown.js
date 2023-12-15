@@ -38,7 +38,7 @@ const ProfileDropdown = () => {
                         <span className="text-start ms-xl-2">
                             <span className="d-none d-xl-inline-block ms-1 fw-medium user-name-text">
                                 {/* {userName} */}
-                                Ziya
+                                Admin
                                 </span>
                             {/* <span className="d-none d-xl-block ms-1 fs-12 text-muted user-name-sub-text">Founder</span> */}
                         </span>

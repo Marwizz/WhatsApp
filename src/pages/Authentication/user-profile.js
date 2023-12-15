@@ -31,10 +31,10 @@ import { editProfile, resetProfileFlag } from "../../store/actions";
 const UserProfile = () => {
   const dispatch = useDispatch();
 
-  const [email, setemail] = useState("ziyajewelers@gmail.com");
+  const [email, setemail] = useState("admin.whatsapp@marwiz.in");
   const [idx, setidx] = useState("1");
 
-  const [userName, setUserName] = useState("Ziya");
+  const [userName, setUserName] = useState("Admin");
 
   const { user, success, error } = useSelector(state => ({
     user: state.Profile.user,
