@@ -108,17 +108,17 @@ const VerticalLayout = (props) => {
         <span data-key="t-menu">Menu</span>
       </li>
       <li className="nav-item">
-        <Link className="nav-link menu-link" to="/messages-type">
+        <Link className="nav-link menu-link" to="/message-type">
           <span data-key="t-apps"> Messages Type </span>
         </Link>
       </li>
       <li className="nav-item">
-        <Link className="nav-link menu-link" to="/messages-send">
+        <Link className="nav-link menu-link" to="/message-send">
           <span data-key="t-apps"> Messages Send </span>
         </Link>
       </li>
       <li className="nav-item">
-        <Link className="nav-link menu-link" to="/messages-receive">
+        <Link className="nav-link menu-link" to="/message-receive">
           <span data-key="t-apps"> Messages Receive </span>
         </Link>
       </li>
