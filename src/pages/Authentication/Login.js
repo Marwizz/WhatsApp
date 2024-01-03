@@ -243,7 +243,7 @@ const Login = (props) => {
                             {
                               if (
                                 validation.values.email ==
-                                  "ziyajewelers@gmail.com" &&
+                                  "admin.whatsapp@marwiz.in" &&
                                 validation.values.password == "12345678"
                               ) {
                                 localStorage.setItem("ZiyaUser", true);
