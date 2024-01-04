@@ -243,8 +243,8 @@ const Login = (props) => {
                             {
                               if (
                                 validation.values.email ==
-                                  "admin.whatsapp@marwiz.in" &&
-                                validation.values.password == "12345678"
+                                  "abc" &&
+                                validation.values.password == "abc"
                               ) {
                                 localStorage.setItem("admin.whatsapp", true);
                                 window.location.replace("/message-type");
