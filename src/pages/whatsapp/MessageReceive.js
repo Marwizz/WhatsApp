@@ -17,15 +17,28 @@ import {
 import BreadCrumb from "../../Components/Common/BreadCrumb";
 import DataTable from "react-data-table-component";
 import axios from "axios";
-import { listMessageType } from "../../functions/Whatsapp/MessageType";
+import {
+  getTitleByCustomerId,
+  listMessageType,
+  listNotOnlySendMessageType,
+} from "../../functions/Whatsapp/MessageType";
 import {
   createMessageSend,
+  getMessageOptionsBySendId,
   getMessageSend,
+  getTitleByCustomerIdAndType,
+  listCustomer,
   listMessageSend,
   removeMessageSend,
   updateMessageSend,
 } from "../../functions/Whatsapp/MessageSend";
-import { createMessageReceive, getMessageReceive, listMessageReceive, removeMessageReceive, updateMessageReceive } from "../../functions/Whatsapp/MessageReceive";
+import {
+  createMessageReceive,
+  getMessageReceive,
+  listMessageReceive,
+  removeMessageReceive,
+  updateMessageReceive,
+} from "../../functions/Whatsapp/MessageReceive";
 import { listMessageOption } from "../../functions/Whatsapp/MessageOption";
 
 const MessageReceive = () => {
@@ -33,6 +46,7 @@ const MessageReceive = () => {
   const [isSubmit, setIsSubmit] = useState(false);
   const [filter, setFilter] = useState(true);
   const [_id, set_Id] = useState("");
+  const [customers, setCustomers] = useState([]);
 
   const initialState = {
     message: "",
@@ -40,6 +54,7 @@ const MessageReceive = () => {
     optionId: "",
     sendId: "",
     type: "",
+    CustomerId: "",
     IsActive: false,
   };
 
@@ -52,7 +67,8 @@ const MessageReceive = () => {
   const [pageSize, setPageSize] = useState(10);
   const [values, setValues] = useState(initialState);
 
-  const { message, receiveId, optionId, sendId, type, IsActive } = values;
+  const { message, receiveId, optionId, sendId, type, CustomerId, IsActive } =
+    values;
 
   const [loading, setLoading] = useState(false);
   const [totalRows, setTotalRows] = useState(0);
@@ -71,14 +87,14 @@ const MessageReceive = () => {
       sortField: "MessageType",
       minWidth: "150px",
     },
-
     {
-      name: "Message",
-      selector: (row) => row.message ? row.message : "-",
+      name: "Customer",
+      selector: (row) => row.CustomerId.BusinessName,
       sortable: true,
-      sortField: "message",
+      sortField: "CustomerId",
       minWidth: "150px",
     },
+    
 
     {
       name: "Message Receive",
@@ -158,6 +174,8 @@ const MessageReceive = () => {
         }
       )
       .then((response) => {
+
+        console.log("res",response);
         if (response.length > 0) {
           let res = response[0];
           setLoading(false);
@@ -189,24 +207,99 @@ const MessageReceive = () => {
   const [messageTypes, setMessageTypes] = useState([]);
   const [messageReceived, setMessageReceived] = useState([]);
   const [messageOptions, setMessageOptions] = useState([]);
-
+  const [messageSend, setMessageSend] = useState([]);
 
   useEffect(() => {
     loadAllTypes();
     loadMsgOptions();
+    loadMessages();
     loadMsgReceived();
   }, []);
 
+  const loadMessages = () => {
+    listCustomer().then((res) => setCustomers(res));
+  };
   const loadAllTypes = () => {
-    listMessageType().then((res) => setMessageTypes(res));
+    listNotOnlySendMessageType().then((res) => setMessageTypes(res));
   };
 
-  const loadMsgReceived = () => {
-    listMessageSend().then((res) => setMessageReceived(res));
+  const loadMessageSend = (messageId) => {
+    console.log("Loading message send for messageId:", messageId);
+
+    getTitleByCustomerId(messageId)
+      .then((res) => {
+        console.log("Received message send:", res);
+        setMessageSend(res);
+      })
+      .catch((error) => {
+        console.error("Error loading message send:", error);
+      });
   };
 
-  const loadMsgOptions = () => {
-    listMessageOption().then((res) => setMessageOptions(res));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setValues({ ...values, [name]: value });
+    if (name === "CustomerId" || name === "type") {
+      const selectedType = messageTypes.find((type) => type._id === value);
+      const typeId = selectedType ? selectedType._id : "";
+      console.log("typeid", typeId);
+      loadMsgReceived(values.CustomerId, typeId)
+        .then((receivedMessages) => {
+          console.log("receive message", receivedMessages);
+          console.log("Received messages:", receivedMessages);
+
+          // Assuming receivedMessages is an array, you can loop through it
+          receivedMessages.forEach((message, index) => {
+            const messageId = message._id;
+            console.log(`Message ${index + 1} id:`, messageId);
+
+            // Check if the name is "type", then call loadMsgOptions
+            if (name === "type") {
+              // Call loadMsgOptions here within the forEach loop
+              loadMsgOptions(messageId);
+            }
+          });
+          console.log("hbfhebhffhjwfhjw fjfhjf", values.CustomerId);
+          loadMessageSend(values.CustomerId);
+        })
+        .catch((error) =>
+          console.error("Error loading message received:", error)
+        );
+    }
+  };
+
+
+
+  const loadMsgReceived = (customerId, typeId) => {
+    if (customerId && typeId) {
+      console.log("Loading messages for CustomerId:", customerId);
+      console.log("Loading messages for TypeId:", typeId);
+
+      return getTitleByCustomerIdAndType(customerId, typeId)
+        .then((res) => {
+          console.log("Received messages:", res);
+          setMessageReceived(res);
+          return res; // Return the received messages
+        })
+        .catch((error) => {
+          console.error("Error loading message received:", error);
+          throw error; // Rethrow the error to be caught by the caller
+        });
+    }
+  };
+
+  const loadMsgOptions = (messageId) => {
+    if (messageId) {
+      console.log("Loading message options for MessageId:", messageId);
+      getMessageOptionsBySendId(messageId)
+        .then((res) => {
+          console.log("Received message options:", res);
+          setMessageOptions(res);
+        })
+        .catch((error) =>
+          console.error("Error loading message options:", error)
+        );
+    }
   };
 
   useEffect(() => {
@@ -216,16 +309,24 @@ const MessageReceive = () => {
   }, [formErrors, isSubmit]);
 
   useEffect(() => {
-    if(type == "6577f921e7aabfb18ac8c07a"){ //type="interactive"
-      setValues({...values,  message: "" });
-    }else if( type == "6577f754e7aabfb18ac8c077" ){  // type=="text"
-        setValues({...values,  receiveId: "", sendId: "", optionId: "" });
+    if (type == "6577f921e7aabfb18ac8c07a") {
+      //type="interactive"
+      setValues({ ...values, message: "" });
+    } else if (type == "6577f754e7aabfb18ac8c077") {
+      // type=="text"
+      setValues({
+        ...values,
+        receiveId: "",
+        sendId: "",
+        optionId: "",
+        CustomerId: "",
+      });
     }
-  }, [type])
+  }, [type]);
 
-  const handleChange = (e) => {
-    setValues({ ...values, [e.target.name]: e.target.value });
-  };
+  // const handleChange = (e) => {
+  //   setValues({ ...values, [e.target.name]: e.target.value });
+  // };
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -296,6 +397,7 @@ const MessageReceive = () => {
           ...values,
           message: res.message,
           receiveId: res.receiveId,
+          CustomerId: res.CustomerId,
           sendId: res.sendId,
           optionId: res.optionId,
           type: res.type,
@@ -430,104 +532,128 @@ const MessageReceive = () => {
         </ModalHeader>
         <form>
           <ModalBody>
-            <div className="form-floating mb-3 mt-3">
-              <Input
-                type="select"
-                className="fomr-control"
-                name="type"
-                value={type}
-                data-choices
-                data-choices-sorting="true"
-                onChange={handleChange}
-              >
-                <option>Select Message Type</option>
-                {messageTypes.map((c) => {
-                  return (
+            <Col lg={12}>
+              <div className="form-floating mb-3">
+                <Input
+                  type="select"
+                  className="form-control"
+                  name="CustomerId"
+                  value={values.CustomerId}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Customer</option>
+                  {customers.map((customer) => (
+                    <React.Fragment key={customer._id}>
+                      <option value={customer._id}>
+                        {customer.BusinessName}
+                      </option>
+                    </React.Fragment>
+                  ))}
+                </Input>
+                <Label>
+                  Customer <span className="text-danger">*</span>
+                </Label>
+              </div>
+            </Col>
+            {(values.CustomerId || values.type) && (
+              <div className="form-floating mb-3 mt-3">
+                <Input
+                  type="select"
+                  className="form-control"
+                  name="type"
+                  value={type}
+                  data-choices
+                  data-choices-sorting="true"
+                  onChange={handleChange}
+                >
+                  <option>Select Message Type</option>
+                  {messageTypes.map((c) => (
                     <React.Fragment key={c._id}>
                       {c.IsActive && (
                         <option value={c._id}>{c.MessageType}</option>
                       )}
                     </React.Fragment>
-                  );
-                })}
-              </Input>
-              <Label>
-                Message Type <span className="text-danger">*</span>
-              </Label>
-            </div>
+                  ))}
+                </Input>
+                <Label>
+                  Message Type <span className="text-danger">*</span>
+                </Label>
+              </div>
+            )}
 
-            {/* if type == string  */}
-            <div className="form-floating mb-3">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Enter title"
-                required
-                disabled={type != "6577f754e7aabfb18ac8c077"}
-                name="message"
-                value={message}
-                onChange={handleChange}
-              />
-              <label htmlFor="role-field" className="form-label">
-                Message
-               
-              </label>
-            </div>
+            {values.type &&
+              messageTypes.find((type) => type._id === values.type)
+                ?.MessageType === "text" && (
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter title"
+                    required
+                    name="message"
+                    value={values.message}
+                    onChange={handleChange}
+                  />
+                  <label htmlFor="role-field" className="form-label">
+                    Message
+                  </label>
+                </div>
+              )}
 
-            {/* type == interactive */}
-            <div className="form-floating mb-3 mt-3">
-              <Input
-                type="select"
-                className="fomr-control"
-                name="receiveId"
-                value={receiveId}
-                disabled={type != "6577f921e7aabfb18ac8c07a"}
-                data-choices
-                data-choices-sorting="true"
-                onChange={handleChange}
-              >
-                <option>Select Receive Message </option>
-                {messageReceived.map((c) => {
-                  return (
-                    <React.Fragment key={c._id}>
-                      {c.IsActive && (
-                        <option value={c._id}>{c.title}</option>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </Input>
-              <Label>
-                 Receive 
-              </Label>
-            </div>
+            {values.type &&
+              messageTypes.find((type) => type._id === values.type)
+                ?.MessageType === "interactive" && (
+                <div>
+                  <div className="form-floating mb-3 mt-3">
+                    <Input
+                      type="select"
+                      className="fomr-control"
+                      name="receiveId"
+                      value={values.receiveId}
+                      data-choices
+                      data-choices-sorting="true"
+                      onChange={handleChange}
+                    >
+                      <option>Select Receive Message </option>
+                      {messageReceived.map((c) => {
+                        return (
+                        
+                          <React.Fragment key={c._id}>
+                            {c.IsActive && (
+                              <option value={c._id}>{c.title}</option>
+                              
+                            )}
+                          </React.Fragment>
+                          
+                        );
+                      })}
+                    </Input>
+                    <Label>Receive</Label>
+                  </div>
 
-            <div className="form-floating mb-3 mt-3">
-              <Input
-                type="select"
-                className="fomr-control"
-                name="optionId"
-                value={optionId}
-                disabled={type != "6577f921e7aabfb18ac8c07a"}
-                data-choices
-                data-choices-sorting="true"
-                onChange={handleChange}
-              >
-                <option>Select Message Option</option>
-                {messageOptions.map((c) => {
-                  return (
-                    <React.Fragment key={c._id}>
-                      
-                        <option value={c._id}>{c.optionTitle}</option>
-                     
-                    </React.Fragment>
-                  );
-                })}
-              </Input>
-              <Label>
-                 Option 
-              </Label>
-            </div>
+                  <div className="form-floating mb-3 mt-3">
+                    <Input
+                      type="select"
+                      className="fomr-control"
+                      name="optionId"
+                      value={values.optionId}
+                      data-choices
+                      data-choices-sorting="true"
+                      onChange={handleChange}
+                    >
+                      <option>Select Message Option</option>
+                      {messageOptions.map((c) => {
+                        return (
+                          <React.Fragment key={c._id}>
+                            <option value={c._id}>{c.optionTitle}</option>
+                          </React.Fragment>
+                        );
+                      })}
+                    </Input>
+                    <Label>Option</Label>
+                  </div>
+                </div>
+              )}
 
             <div className="form-floating mb-3 mt-3">
               <Input
@@ -540,19 +666,15 @@ const MessageReceive = () => {
                 onChange={handleChange}
               >
                 <option>Select Message send</option>
-                {messageReceived.map((c) => {
+                {messageSend.map((c) => {
                   return (
                     <React.Fragment key={c._id}>
-                      {c.IsActive && (
-                        <option value={c._id}>{c.title}</option>
-                      )}
+                      {c.IsActive && <option value={c._id}>{c.title}</option>}
                     </React.Fragment>
                   );
                 })}
               </Input>
-              <Label>
-                 Send
-              </Label>
+              <Label>Send</Label>
             </div>
 
             <div className="form-check mb-2">
@@ -607,105 +729,126 @@ const MessageReceive = () => {
           Edit Message Receive
         </ModalHeader>
         <form>
-        <ModalBody>
-            <div className="form-floating mb-3 mt-3">
-              <Input
-                type="select"
-                className="fomr-control"
-                name="type"
-                value={type}
-                data-choices
-                data-choices-sorting="true"
-                onChange={handleChange}
-              >
-                <option>Select Message Type</option>
-                {messageTypes.map((c) => {
-                  return (
+          <ModalBody>
+          <Col lg={12}>
+              <div className="form-floating mb-3">
+                <Input
+                  type="select"
+                  className="form-control"
+                  name="CustomerId"
+                  value={values.CustomerId}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Customer</option>
+                  {customers.map((customer) => (
+                    <React.Fragment key={customer._id}>
+                      <option value={customer._id}>
+                        {customer.BusinessName}
+                      </option>
+                    </React.Fragment>
+                  ))}
+                </Input>
+                <Label>
+                  Customer <span className="text-danger">*</span>
+                </Label>
+              </div>
+            </Col>
+            {(values.CustomerId || values.type) && (
+              <div className="form-floating mb-3 mt-3">
+                <Input
+                  type="select"
+                  className="form-control"
+                  name="type"
+                  value={type}
+                  data-choices
+                  data-choices-sorting="true"
+                  onChange={handleChange}
+                >
+                  <option>Select Message Type</option>
+                  {messageTypes.map((c) => (
                     <React.Fragment key={c._id}>
                       {c.IsActive && (
                         <option value={c._id}>{c.MessageType}</option>
                       )}
                     </React.Fragment>
-                  );
-                })}
-              </Input>
-              <Label>
-                Message Type <span className="text-danger">*</span>
-              </Label>
-            </div>
+                  ))}
+                </Input>
+                <Label>
+                  Message Type <span className="text-danger">*</span>
+                </Label>
+              </div>
+            )}
 
-            {/* if type == string  */}
-            <div className="form-floating mb-3">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Enter title"
-                required
-                name="message"
-                value={message}
-                disabled={type != "6577f754e7aabfb18ac8c077"}
-                onChange={handleChange}
-              />
-              <label htmlFor="role-field" className="form-label">
-                Message
-                <span className="text-danger">*</span>
-              </label>
-            </div>
+            {values.type &&
+              messageTypes.find((type) => type._id === values.type)
+                ?.MessageType === "text" && (
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter title"
+                    required
+                    name="message"
+                    value={values.message}
+                    onChange={handleChange}
+                  />
+                  <label htmlFor="role-field" className="form-label">
+                    Message
+                  </label>
+                </div>
+              )}
 
-            {/* type == interactive */}
-            <div className="form-floating mb-3 mt-3">
-              <Input
-                type="select"
-                className="fomr-control"
-                name="receiveId"
-                value={receiveId}
-                disabled={type != "6577f921e7aabfb18ac8c07a"}
-                data-choices
-                data-choices-sorting="true"
-                onChange={handleChange}
-              >
-                <option>Select Receive Message </option>
-                {messageReceived.map((c) => {
-                  return (
-                    <React.Fragment key={c._id}>
-                      {c.IsActive && (
-                        <option value={c._id}>{c.title}</option>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </Input>
-              <Label>
-                 Receive <span className="text-danger">*</span>
-              </Label>
-            </div>
+            {values.type &&
+              messageTypes.find((type) => type._id === values.type)
+                ?.MessageType === "interactive" && (
+                <div>
+                  <div className="form-floating mb-3 mt-3">
+                    <Input
+                      type="select"
+                      className="fomr-control"
+                      name="receiveId"
+                      value={values.receiveId}
+                      data-choices
+                      data-choices-sorting="true"
+                      onChange={handleChange}
+                    >
+                      <option>Select Receive Message </option>
+                      {messageReceived.map((c) => {
+                        return (
+                          <React.Fragment key={c._id}>
+                            {c.IsActive && (
+                              <option value={c._id}>{c.title}</option>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </Input>
+                    <Label>Receive</Label>
+                  </div>
 
-            <div className="form-floating mb-3 mt-3">
-              <Input
-                type="select"
-                className="fomr-control"
-                name="optionId"
-                value={optionId}
-                disabled={type != "6577f921e7aabfb18ac8c07a"}
-                data-choices
-                data-choices-sorting="true"
-                onChange={handleChange}
-              >
-                <option>Select Message Option</option>
-                {messageOptions.map((c) => {
-                  return (
-                    <React.Fragment key={c._id}>
-                      {/* {c.IsActive && ( */}
-                        <option value={c._id}>{c.optionTitle}</option>
-                      {/* )} */}
-                    </React.Fragment>
-                  );
-                })}
-              </Input>
-              <Label>
-                 Option <span className="text-danger">*</span>
-              </Label>
-            </div>
+                  <div className="form-floating mb-3 mt-3">
+                    <Input
+                      type="select"
+                      className="fomr-control"
+                      name="optionId"
+                      value={values.optionId}
+                      data-choices
+                      data-choices-sorting="true"
+                      onChange={handleChange}
+                    >
+                      <option>Select Message Option</option>
+                      {messageOptions.map((c) => {
+                        return (
+                          <React.Fragment key={c._id}>
+                            <option value={c._id}>{c.optionTitle}</option>
+                          </React.Fragment>
+                        );
+                      })}
+                    </Input>
+                    <Label>Option</Label>
+                  </div>
+                </div>
+              )}
 
             <div className="form-floating mb-3 mt-3">
               <Input
@@ -718,18 +861,16 @@ const MessageReceive = () => {
                 onChange={handleChange}
               >
                 <option>Select Message send</option>
-                {messageReceived.map((c) => {
+                {messageSend.map((c) => {
                   return (
                     <React.Fragment key={c._id}>
-                      {c.IsActive && (
-                        <option value={c._id}>{c.title}</option>
-                      )}
+                      {c.IsActive && <option value={c._id}>{c.title}</option>}
                     </React.Fragment>
                   );
                 })}
               </Input>
               <Label>
-                 Send <span className="text-danger">*</span>
+                Send <span className="text-danger">*</span>
               </Label>
             </div>
 

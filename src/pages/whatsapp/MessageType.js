@@ -33,6 +33,7 @@ const MessageType = () => {
   const initialState = {
     MessageType: "",
     IsActive: false,
+    OnlySend:false,
   };
 
   const [remove_id, setRemove_id] = useState("");
@@ -44,7 +45,7 @@ const MessageType = () => {
   const [pageSize, setPageSize] = useState(10);
   const [values, setValues] = useState(initialState);
 
-  const { MessageType, IsActive } = values;
+  const { MessageType, IsActive, OnlySend} = values;
 
   const [loading, setLoading] = useState(false);
   const [totalRows, setTotalRows] = useState(0);
@@ -71,6 +72,14 @@ const MessageType = () => {
       },
       sortable: false,
       sortField: "IsActive",
+    },
+    {
+      name: "Status",
+      selector: (row) => {
+        return <p>{row.OnlySend ? "Send" : "Not Send"}</p>;
+      },
+      sortable: false,
+      sortField: "OnlySend",
     },
     {
       name: "Action",
@@ -131,9 +140,11 @@ const MessageType = () => {
           sortdir: sortDirection,
           match: query,
           IsActive: filter,
+          // OnlySend:filter
         }
       )
       .then((response) => {
+        console.log("res",response)
         if (response.length > 0) {
           let res = response[0];
           setLoading(false);
@@ -177,6 +188,10 @@ const MessageType = () => {
   const handlecheck = (e) => {
     setValues({ ...values, IsActive: e.target.checked });
   };
+
+  const handleCheckk = (e) => {
+    setValues({ ...values, OnlySend: e.target.checked });
+  }
 
   const [modal_list, setModalList] = useState(false);
 
@@ -262,6 +277,7 @@ const MessageType = () => {
           ...values,
           MessageType: res.MessageType,
           IsActive: res.IsActive,
+          OnlySend:res.OnlySend
         });
       })
       .catch((err) => {
@@ -414,6 +430,19 @@ const MessageType = () => {
             <div className="form-check mb-2">
               <Input
                 type="checkbox"
+                name="OnlySend"
+                value={OnlySend}
+                onChange={handleCheckk}
+                checked={OnlySend}
+              />
+              <Label className="form-check-label" htmlFor="activeCheckBox">
+                Only Send
+              </Label>
+            </div>
+
+            <div className="form-check mb-2">
+              <Input
+                type="checkbox"
                 name="IsActive"
                 value={IsActive}
                 onChange={handlecheck}
@@ -478,6 +507,19 @@ const MessageType = () => {
                 value={MessageType}
                 onChange={handleChange}
               />
+            </div>
+
+            <div className="form-check mb-2">
+              <Input
+                type="checkbox"
+                name="OnlySend"
+                value={OnlySend}
+                checked={OnlySend}
+                onChange={handleCheckk}
+              />
+              <Label className="form-check-label" htmlFor="activeCheckBox">
+                Only Send
+              </Label>
             </div>
 
             <div className="form-check mb-2">

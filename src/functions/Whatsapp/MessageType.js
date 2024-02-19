@@ -36,3 +36,16 @@ export const updateMessageType = async (_id, values) => {
     values
   );
 };
+
+export const listNotOnlySendMessageType = async () => {
+  return await axios.get(
+    `${process.env.REACT_APP_API_URL_ZIYA}/api/auth/list-message-type-not-send-only`
+  );
+};
+
+export const getTitleByCustomerId = async (customerId) => {
+  return await axios.get(
+    `${process.env.REACT_APP_API_URL_ZIYA}/api/auth/titles/${customerId}`
+  );
+};
+

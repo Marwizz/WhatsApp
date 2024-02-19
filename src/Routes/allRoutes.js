@@ -14,6 +14,8 @@ import UserProfile from "../pages/Authentication/user-profile";
 import MessageType from "../pages/whatsapp/MessageType";
 import MessageSend from "../pages/whatsapp/MessageSend";
 import MessageReceive from "../pages/whatsapp/MessageReceive";
+import Customer from "../pages/whatsapp/Customer";
+import Token from "../pages/whatsapp/Token";
 
 
 const authProtectedRoutes = [
@@ -21,6 +23,8 @@ const authProtectedRoutes = [
   { path: "/message-type", component: <MessageType /> },
   { path: "/message-send", component: <MessageSend /> },
   { path: "/message-receive", component: <MessageReceive/> },
+  {path :"/customer",component:<Customer/>},
+  {path :"/token",component:<Token/>},
 
   // //User Profile
   { path: "/profile", component: <UserProfile /> },
