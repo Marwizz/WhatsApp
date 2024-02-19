@@ -23,6 +23,7 @@ import { listMessageType } from "../../functions/Whatsapp/MessageType";
 import {
   createMessageSend,
   getMessageSend,
+  listCustomer,
   removeMessageSend,
   updateMessageSend,
 } from "../../functions/Whatsapp/MessageSend";
@@ -40,7 +41,7 @@ const MessageSend = () => {
   const [filter, setFilter] = useState(true);
   const [_id, set_Id] = useState("");
   const [Op_id, setOp_Id] = useState("");
-
+  const [customers, setCustomers] = useState([]);
 
   const initialState = {
     title: "",
@@ -50,6 +51,11 @@ const MessageSend = () => {
     action: "",
     options: [],
     type: "",
+    CustomerId: "",
+    longitude: "",
+    latitude: "",
+    LocationName: "",
+    LocationAddress: "",
     IsActive: false,
   };
 
@@ -68,8 +74,21 @@ const MessageSend = () => {
   const [values, setValues] = useState(initialState);
   const [optionValues, setOptionValues] = useState(initialOption);
 
-  const { title, header, body, footer, action, options, type, IsActive } =
-    values;
+  const {
+    title,
+    header,
+    body,
+    footer,
+    action,
+    options,
+    type,
+    IsActive,
+    longitude,
+    latitude,
+    LocationName,
+    LocationAddress,
+    CustomerId,
+  } = values;
 
   const { optionTitle, optionDescription } = optionValues;
 
@@ -98,12 +117,17 @@ const MessageSend = () => {
       sortField: "title",
       minWidth: "150px",
     },
-
     {
-      name: "Header",
-      selector: (row) => row.header,
+      name: "Customer",
+      selector: (row) => {
+        // Assuming customers is an array containing customer objects with _id and BusinessName properties
+        const customer = customers.find(
+          (customer) => customer._id === row.CustomerId
+        );
+        return customer ? customer.BusinessName : row.CustomerId;
+      },
       sortable: true,
-      sortField: "header",
+      sortField: "CustomerId",
       minWidth: "150px",
     },
 
@@ -215,6 +239,7 @@ const MessageSend = () => {
 
   useEffect(() => {
     loadAllTypes();
+    loadMessages();
   }, []);
 
   useEffect(() => {
@@ -225,6 +250,12 @@ const MessageSend = () => {
     listMessageType().then((res) => setMessageTypes(res));
   };
 
+  console.log("mcc njnjc", customers);
+
+  const loadMessages = () => {
+    listCustomer().then((res) => setCustomers(res));
+  };
+
   const loadAllMsgOptionData = () => {
     listMessageOption().then((res) => {
       if (Array.isArray(options)) {
@@ -233,7 +264,7 @@ const MessageSend = () => {
         );
         setOptionData(filteredOptions);
       } else {
-        console.error('options is not an array');
+        console.error("options is not an array");
       }
     });
   };
@@ -245,6 +276,19 @@ const MessageSend = () => {
   }, [formErrors, isSubmit]);
 
   const handleChange = (e) => {
+    // Reset the validation error for the field being changed
+    setErrors({ ...errors, [e.target.name]: "" });
+
+    // Update state variables
+    if (e.target.name === "title") {
+      setTitles(e.target.value);
+    } else if (e.target.name === "type") {
+      setSelectedType(e.target.value);
+    } else if (e.target.name === "CustomerId") {
+      setSelectedCustomer(e.target.value);
+    }
+
+    // Update values object
     setValues({ ...values, [e.target.name]: e.target.value });
   };
 
@@ -252,25 +296,50 @@ const MessageSend = () => {
     setOptionValues({ ...optionValues, [e.target.name]: e.target.value });
   };
 
+  const [titles, setTitles] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState("");
+  const [addOptionClicked, setAddOptionClicked] = useState(false);
+  const [isSubmitClicked, setIsSubmitClicked] = useState(false);
+  const [errors, setErrors] = useState({});
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("send data", values);
-    // let errors = validate(values);
-    // setFormErrors(errors);
-    setIsSubmit(true);
-    // if (Object.keys(errors).length === 0) {
-    createMessageSend(values)
-      .then((res) => {
-        setModalList(!modal_list);
-        setShowForm(false);
-        setValues(initialState);
-        setIsSubmit(false);
-        setFormErrors({});
-        fetchAllData();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    setIsSubmitClicked(true);
+
+    // Check if required fields are filled
+    const newErrors = {};
+    if (!title) {
+      newErrors.title = "Title is required";
+    }
+    if (!selectedType) {
+      newErrors.type = "Message Type is required";
+    }
+    if (!selectedCustomer) {
+      newErrors.CustomerId = "Customer is required";
+    }
+    if (!addOptionClicked) {
+      newErrors.addOption = "Add options is required";
+    }
+    setErrors(newErrors);
+
+    // Proceed with form submission if no errors
+    //if (Object.keys(newErrors).length === 0) {
+      console.log("send data", values);
+      setIsSubmit(true);
+      createMessageSend(values)
+        .then((res) => {
+          setModalList(!modal_list);
+          setShowForm(false);
+          setValues(initialState);
+          setIsSubmit(false);
+          setErrors({});
+          fetchAllData();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    //}
   };
 
   const tog_list = () => {
@@ -326,9 +395,13 @@ const MessageSend = () => {
           action: res.action,
           type: res.type,
           options: res.options,
+          latitude: res.latitude,
+          longitude: res.longitude,
+          LocationName: res.LocationName,
+          LocationAddress: res.LocationAddress,
           IsActive: res.IsActive,
+          CustomerId: res.CustomerId,
         });
-
       })
       .catch((err) => {
         console.log(err);
@@ -342,9 +415,9 @@ const MessageSend = () => {
     createMessageOption(optionValues)
       .then((res) => {
         // setModalList(!modal_list);
-       
+
         const newOptions = [...options, res._id];
-      setValues((prevValues) => ({ ...prevValues, options: newOptions }));
+        setValues((prevValues) => ({ ...prevValues, options: newOptions }));
         setAddOptionModal(false);
         setOptionValues(initialOption);
         // setFormErrors({});
@@ -544,9 +617,14 @@ const MessageSend = () => {
                                           htmlFor="role-field"
                                           className="form-label"
                                         >
-                                          Title
+                                          Title{" "}
                                           <span className="text-danger">*</span>
                                         </label>
+                                        {errors.title && (
+                                          <span className="text-danger">
+                                            {errors.title}
+                                          </span>
+                                        )}
                                       </div>
                                     </Col>
                                     <Col lg={3}>
@@ -554,54 +632,196 @@ const MessageSend = () => {
                                         <Input
                                           type="select"
                                           className="form-control"
-                                          name="type"
-                                          value={type}
-                                          data-choices
-                                          data-choices-sorting="true"
-                                          onChange={handleChange}
+                                          name="type" // This should match your state structure
+                                          value={values.type} // Use the `type` from your `values` state
+                                          onChange={handleChange} // Use the existing handleChange to update state
                                         >
                                           <option>Select Type</option>
-                                          {messageTypes.map((c) => {
-                                            return (
-                                              <React.Fragment key={c._id}>
-                                                {c.IsActive && (
-                                                  <option value={c._id}>
-                                                    {c.MessageType}
-                                                  </option>
-                                                )}
-                                              </React.Fragment>
-                                            );
-                                          })}
+                                          {messageTypes.map((c) => (
+                                            <React.Fragment key={c._id}>
+                                              {c.IsActive && (
+                                                <option value={c._id}>
+                                                  {c.MessageType}
+                                                </option> // Assuming you want to use _id as value
+                                              )}
+                                            </React.Fragment>
+                                          ))}
                                         </Input>
                                         <Label>
                                           Message Type{" "}
                                           <span className="text-danger">*</span>
                                         </Label>
+                                        {errors.type && (
+                                          <span className="text-danger">
+                                            {errors.type}
+                                          </span>
+                                        )}
                                       </div>
                                     </Col>
 
-                                    <Col lg={6}>
-                                      <div className="d-flex justify-content-end">
-                                        <button
-                                          type="submit"
-                                          className="btn btn-md btn-outline-primary"
-                                          id="add-btn"
-                                          disabled={
-                                            type != "6577f921e7aabfb18ac8c07a"
-                                          }
-                                          onClick={(e) => {
-                                            e.preventDefault();
-                                            setAddOptionModal(!addOptionModal);
-                                          }}
+                                    <Col lg={3}>
+                                      <div className="form-floating mb-3">
+                                        <Input
+                                          type="select"
+                                          className="form-control"
+                                          name="CustomerId" // This should match the property in your `values` state
+                                          value={values.CustomerId} // Use the `CustomerId` from your `values` state
+                                          onChange={handleChange} // Reuse the existing handleChange to update state
                                         >
-                                          Add Option{" "}
-                                          <i class="ri-add-circle-fill m-1"></i>
-                                        </button>
+                                          <option value="">
+                                            Select Customer
+                                          </option>
+                                          {customers.map((customer) => (
+                                            <React.Fragment key={customer._id}>
+                                              <option value={customer._id}>
+                                                {customer.BusinessName}
+                                              </option>
+                                            </React.Fragment>
+                                          ))}
+                                        </Input>
+                                        <Label>
+                                          Customer{" "}
+                                          <span className="text-danger">*</span>
+                                        </Label>
+                                        {errors.CustomerId && (
+                                          <span className="text-danger">
+                                            {errors.CustomerId}
+                                          </span>
+                                        )}
                                       </div>
                                     </Col>
+
+                                    {/* Conditional Rendering for Form Fields */}
+                                    {values.type &&
+                                      messageTypes.find(
+                                        (type) => type._id === values.type
+                                      )?.MessageType === "text" && (
+                                        <Col lg={8}>
+                                          {/* Render Message Body for "text" type */}
+                                          <div className="form-floating mb-3">
+                                            <Input
+                                              type="textarea"
+                                              name="body"
+                                              className="form-control"
+                                              placeholder="Enter body"
+                                              value={values.body}
+                                              onChange={handleChange}
+                                            />
+                                            <label>Message Body</label>
+                                          </div>
+                                        </Col>
+                                      )}
                                   </Row>
 
-                                  <Row>
+                                  {values.type &&
+                                    messageTypes.find(
+                                      (type) => type._id === values.type
+                                    )?.MessageType === "interactive" && (
+                                      <>
+                                        <Row>
+                                          <Col lg={6}>
+                                            <div className="form-floating mb-3">
+                                              <Input
+                                                type="textarea"
+                                                name="header"
+                                                className="form-control"
+                                                id="header"
+                                                placeholder="Message Header"
+                                                value={values.header}
+                                                onChange={handleChange}
+                                              />
+                                              <Label for="header">
+                                                Message Header
+                                              </Label>
+                                            </div>
+                                          </Col>
+                                        </Row>
+                                        <Row>
+                                          <Col lg={8}>
+                                            <div className="form-floating mb-3">
+                                              <Input
+                                                type="textarea"
+                                                className="form-control"
+                                                placeholder="Enter body"
+                                                name="body"
+                                                value={values.body}
+                                                onChange={handleChange}
+                                              />
+                                              <Label>Message Body</Label>
+                                            </div>
+                                          </Col>
+                                        </Row>
+                                        <Col lg={6}>
+                                          <div className="form-floating mb-3">
+                                            <Input
+                                              type="textarea"
+                                              name="footer"
+                                              className="form-control"
+                                              id="footer"
+                                              placeholder="Message Footer"
+                                              value={values.footer}
+                                              onChange={handleChange}
+                                            />
+                                            <Label for="footer">
+                                              Message Footer
+                                            </Label>
+                                          </div>
+                                        </Col>
+
+                                        <Row>
+                                          <Col lg={4}>
+                                            <div className="form-floating mb-3">
+                                              <Input
+                                                type="text"
+                                                name="action"
+                                                className="form-control"
+                                                id="action"
+                                                placeholder="Action"
+                                                value={values.action}
+                                                onChange={handleChange}
+                                              />
+                                              <Label for="action">Action</Label>
+                                            </div>
+                                          </Col>
+                                        </Row>
+
+                                        <Col lg={6}>
+                                          <div className="d-flex flex-column align-items-end">
+                                            {values.type &&
+                                              messageTypes.find(
+                                                (type) =>
+                                                  type._id === values.type
+                                              )?.MessageType ===
+                                                "interactive" && (
+                                                <div className="d-flex flex-column align-items-start">
+                                                  <button
+                                                    type="submit"
+                                                    className="btn btn-md btn-outline-primary"
+                                                    id="add-btn"
+                                                    onClick={(e) => {
+                                                      e.preventDefault();
+                                                      setAddOptionModal(
+                                                        !addOptionModal
+                                                      );
+                                                    }}
+                                                  >
+                                                    Add Option{" "}
+                                                    <i className="ri-add-circle-fill m-1"></i>
+                                                  </button>
+                                                  {/* {isSubmitClicked &&
+                                                    !addOptionClicked && (
+                                                      <span className="text-danger ml-2">
+                                                        errors.addOption
+                                                      </span>
+                                                    )} */}
+                                                </div>
+                                              )}
+                                          </div>
+                                        </Col>
+                                      </>
+                                    )}
+
+                                  {/* <Row>
                                     <Col lg={6}>
                                       <div className="form-floating mb-3">
                                         <Input
@@ -622,72 +842,82 @@ const MessageSend = () => {
                                         </label>
                                       </div>
                                     </Col>
-                                  </Row>
-
-                                  <Col lg={8}>
-                                    <div className="form-floating mb-3">
-                                      <Input
-                                        type="textarea"
-                                        className="form-control"
-                                        style={{ height: "140px" }}
-                                        placeholder="Enter body"
-                                        name="body"
-                                        value={body}
-                                        onChange={handleChange}
-                                      />
-                                      <label
-                                        htmlFor="role-field"
-                                        className="form-label"
-                                      >
-                                        Message Body
-                                        {/* <span className="text-danger">*</span> */}
-                                      </label>
-                                    </div>
-                                  </Col>
-
-                                  <Row>
-                                    <Col lg={6}>
-                                      <div className="form-floating mb-3">
-                                        <Input
-                                          type="textarea"
-                                          className="form-control"
-                                          style={{ height: "80px" }}
-                                          placeholder="Enter footer"
-                                          name="footer"
-                                          value={footer}
-                                          onChange={handleChange}
-                                        />
-                                        <label
-                                          htmlFor="role-field"
-                                          className="form-label"
-                                        >
-                                          Message Footer
-                                          {/* <span className="text-danger">*</span> */}
-                                        </label>
-                                      </div>
-                                    </Col>
-                                  </Row>
-
-                                  <Col lg={4}>
-                                    <div className="form-floating mb-3">
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Enter title"
-                                        required
-                                        name="action"
-                                        value={action}
-                                        onChange={handleChange}
-                                      />
-                                      <label
-                                        htmlFor="role-field"
-                                        className="form-label"
-                                      >
-                                        Action
-                                        {/* <span className="text-danger">*</span> */}
-                                      </label>
-                                    </div>
-                                  </Col>
+                                  </Row> */}
+                                  {values.type &&
+                                    messageTypes.find(
+                                      (type) => type._id === values.type
+                                    )?.MessageType === "Location" && (
+                                      <>
+                                        <Row>
+                                          <Col lg={6}>
+                                            <div className="form-floating mb-3">
+                                              <Input
+                                                type="text"
+                                                name="longitude"
+                                                className="form-control"
+                                                id="longitude"
+                                                placeholder="Longitude"
+                                                value={values.longitude}
+                                                onChange={handleChange}
+                                              />
+                                              <Label for="longitude">
+                                                Longitude
+                                              </Label>
+                                            </div>
+                                          </Col>
+                                          <Col lg={6}>
+                                            <div className="form-floating mb-3">
+                                              <Input
+                                                type="text"
+                                                name="latitude"
+                                                className="form-control"
+                                                id="latitude"
+                                                placeholder="Latitude"
+                                                value={values.latitude}
+                                                onChange={handleChange}
+                                              />
+                                              <Label for="latitude">
+                                                Latitude
+                                              </Label>
+                                            </div>
+                                          </Col>
+                                        </Row>
+                                        <Row>
+                                          <Col lg={6}>
+                                            <div className="form-floating mb-3">
+                                              <Input
+                                                type="text"
+                                                name="LocationName"
+                                                className="form-control"
+                                                id="LocationName"
+                                                placeholder="Location Name"
+                                                value={values.LocationName}
+                                                onChange={handleChange}
+                                              />
+                                              <Label for="LocationName">
+                                                Location Name
+                                              </Label>
+                                            </div>
+                                          </Col>
+                                          <Col lg={6}>
+                                            <div className="form-floating mb-3">
+                                              <Input
+                                                type="text"
+                                                name="LocationAddress"
+                                                className="form-control"
+                                                id="LocationAddress"
+                                                placeholder="Location Address"
+                                                value={values.LocationAddress}
+                                                onChange={handleChange}
+                                              />
+                                              <Label for="LocationAddress">
+                                                Location Address
+                                              </Label>
+                                            </div>
+                                          </Col>
+                                        </Row>
+                                      </>
+                                    )}
 
                                   <div className="form-check mb-2  m-2">
                                     <Input
@@ -706,7 +936,7 @@ const MessageSend = () => {
                                   </div>
 
                                   {/* option table */}
-                                  { options && options.length > 0 && (
+                                  {options && options.length > 0 && (
                                     <CardBody
                                       className="mt-2"
                                       style={{ overflowX: "scroll" }}
@@ -791,7 +1021,7 @@ const MessageSend = () => {
                                               setUpdateForm(false);
                                               setIsSubmit(false);
                                               setOptionData(initialOption);
-                                                setValues(initialState);
+                                              setValues(initialState);
                                             }}
                                           >
                                             Cancel

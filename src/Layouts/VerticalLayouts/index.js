@@ -123,6 +123,18 @@ const VerticalLayout = (props) => {
         </Link>
       </li>
 
+      <li className="nav-item">
+        <Link className="nav-link menu-link" to="/customer">
+          <span data-key="t-apps"> Customers </span>
+        </Link>
+      </li>
+
+      <li className="nav-item">
+        <Link className="nav-link menu-link" to="/token">
+          <span data-key="t-apps"> Tokens </span>
+        </Link>
+      </li>
+
     </React.Fragment>
   );
 };
