@@ -26,7 +26,7 @@ import {
   updateMessageSend,
 } from "../../functions/Whatsapp/MessageSend";
 import { createMessageReceive, getMessageReceive, listMessageReceive, removeMessageReceive, updateMessageReceive } from "../../functions/Whatsapp/MessageReceive";
-import { listMessageOption } from "../../functions/Whatsapp/MessageOption";
+import { getMessageOptionsBySendId, listMessageOption } from "../../functions/Whatsapp/MessageOption";
 
 const MessageReceive = () => {
   const [formErrors, setFormErrors] = useState({});
@@ -198,15 +198,24 @@ const MessageReceive = () => {
   }, []);
 
   const loadAllTypes = () => {
-    listMessageType().then((res) => setMessageTypes(res));
+    listMessageType().then((res) => {
+      console.log("Message Types:", res); // Log the message types received from the backend
+      setMessageTypes(res);
+    });
   };
 
   const loadMsgReceived = () => {
-    listMessageSend().then((res) => setMessageReceived(res));
+    listMessageSend().then((res) => {
+      console.log("Message Received:", res); // Log the message received from the backend
+      setMessageReceived(res);
+    });
   };
 
-  const loadMsgOptions = () => {
-    listMessageOption().then((res) => setMessageOptions(res));
+  const loadMsgOptions = (receiveId) => {
+    getMessageOptionsBySendId(receiveId).then((res) => {
+      console.log("Message Options:", res); // Log the message options received from the backend
+      setMessageOptions(res);
+    });
   };
 
   useEffect(() => {
@@ -224,8 +233,37 @@ const MessageReceive = () => {
   }, [type])
 
   const handleChange = (e) => {
-    setValues({ ...values, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    console.log(`Field changed: ${name}, New value: ${value}`);
+  
+    // Set the value for 'type' directly
+    if (name === "type" || name === "interactive") {
+      console.log("Type changed. Value:", value);
+      console.log("Previous receiveId:", values.receiveId);
+      console.log("Previous optionId:", values.optionId);
+  
+      setValues({
+        ...values,
+        [name]: value,
+        receiveId: value === "6577f921e7aabfb18ac8c07a" ? "" : values.receiveId, // Clear receiveId if type is interactive
+        optionId: value === "6577f921e7aabfb18ac8c07a" ? "" : values.optionId, // Clear optionId if type is interactive
+      });
+  
+      console.log("New receiveId:", value === "6577f921e7aabfb18ac8c07a" ? "" : values.receiveId);
+      console.log("New optionId:", value === "6577f921e7aabfb18ac8c07a" ? "" : values.optionId);
+    } else if (name === "receiveId") {
+      // Load message options based on the selected receiveId
+      loadMsgOptions(value);
+    }
+  
+    // For other fields, update the value as usual
+    setValues({
+      ...values,
+      [name]: value,
+    });
   };
+  
+    
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -236,6 +274,7 @@ const MessageReceive = () => {
     // if (Object.keys(errors).length === 0) {
     createMessageReceive(values)
       .then((res) => {
+        console.log("res",res);
         setModalList(!modal_list);
         setValues(initialState);
         setIsSubmit(false);
@@ -663,6 +702,7 @@ const MessageReceive = () => {
                 data-choices
                 data-choices-sorting="true"
                 onChange={handleChange}
+                onClick={(e) => console.log(`Selected receiveId: ${e.target.value}`)} // Log the selected receiveId
               >
                 <option>Select Receive Message </option>
                 {messageReceived.map((c) => {
