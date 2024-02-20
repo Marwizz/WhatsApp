@@ -6,6 +6,12 @@ export const listMessageOption = async () => {
   );
 };
 
+export const getMessageOptionsBySendId = async (messageSendId) => {
+  return await axios.get(
+    `${process.env.REACT_APP_API_URL_ZIYA}/api/auth/message-options/${messageSendId}`
+  );
+};
+
 export const createMessageOption = async (values) => {
   return await axios.post(
     `${process.env.REACT_APP_API_URL_ZIYA}/api/auth/create-message-option`,
