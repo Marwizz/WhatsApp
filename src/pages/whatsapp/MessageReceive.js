@@ -193,7 +193,7 @@ const MessageReceive = () => {
 
   useEffect(() => {
     loadAllTypes();
-    loadMsgOptions();
+    // loadMsgOptions();
     loadMsgReceived();
   }, []);
 
@@ -212,6 +212,7 @@ const MessageReceive = () => {
   };
 
   const loadMsgOptions = (receiveId) => {
+
     getMessageOptionsBySendId(receiveId).then((res) => {
       console.log("Message Options:", res); // Log the message options received from the backend
       setMessageOptions(res);
@@ -224,34 +225,32 @@ const MessageReceive = () => {
     }
   }, [formErrors, isSubmit]);
 
-  useEffect(() => {
-    if(type == "6577f921e7aabfb18ac8c07a"){ //type="interactive"
-      setValues({...values,  message: "" });
-    }else if( type == "6577f754e7aabfb18ac8c077" ){  // type=="text"
-        setValues({...values,  receiveId: "", sendId: "", optionId: "" });
-    }
-  }, [type])
+  // useEffect(() => {
+  //   if(type == "6577f921e7aabfb18ac8c07a"){ //type="interactive"
+  //     setValues({...values,  message: "" });
+  //   }else if( type == "6577f754e7aabfb18ac8c077" ){  // type=="text"
+  //       setValues({...values,  receiveId: "", sendId: "", optionId: "" });
+  //   }
+  // }, [type])
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     console.log(`Field changed: ${name}, New value: ${value}`);
   
     // Set the value for 'type' directly
-    if (name === "type" || name === "interactive") {
-      console.log("Type changed. Value:", value);
-      console.log("Previous receiveId:", values.receiveId);
-      console.log("Previous optionId:", values.optionId);
+    // if (name === "type" || name === "interactive") {
   
-      setValues({
-        ...values,
-        [name]: value,
-        receiveId: value === "6577f921e7aabfb18ac8c07a" ? "" : values.receiveId, // Clear receiveId if type is interactive
-        optionId: value === "6577f921e7aabfb18ac8c07a" ? "" : values.optionId, // Clear optionId if type is interactive
-      });
+    //   setValues({
+    //     ...values,
+    //     [name]: value,
+    //     receiveId: value === "6577f921e7aabfb18ac8c07a" ? "" : values.receiveId, // Clear receiveId if type is interactive
+    //     optionId: value === "6577f921e7aabfb18ac8c07a" ? "" : values.optionId, // Clear optionId if type is interactive
+    //   });
   
-      console.log("New receiveId:", value === "6577f921e7aabfb18ac8c07a" ? "" : values.receiveId);
-      console.log("New optionId:", value === "6577f921e7aabfb18ac8c07a" ? "" : values.optionId);
-    } else if (name === "receiveId") {
+    //   console.log("New receiveId:", value === "6577f921e7aabfb18ac8c07a" ? "" : values.receiveId);
+    //   console.log("New optionId:", value === "6577f921e7aabfb18ac8c07a" ? "" : values.optionId);
+    // } 
+    if (name === "receiveId") {
       // Load message options based on the selected receiveId
       loadMsgOptions(value);
     }
@@ -326,11 +325,12 @@ const MessageReceive = () => {
     setmodal_edit(!modal_edit);
     setIsSubmit(false);
     set_Id(_id);
-
     // setFormErrors(false);
     getMessageReceive(_id)
       .then((res) => {
-        console.log(res);
+        console.log("res in edit", res);
+        console.log("optionid", res.optionId);
+  
         setValues({
           ...values,
           message: res.message,
@@ -340,11 +340,13 @@ const MessageReceive = () => {
           type: res.type,
           IsActive: res.IsActive,
         });
+        loadMsgOptions(res.receiveId);
       })
       .catch((err) => {
         console.log(err);
       });
   };
+  
 
   const handleSort = (column, sortDirection) => {
     setcolumn(column.sortField);
